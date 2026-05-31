@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Có một bất ngờ cho em nè... 💖</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            background-color: #020208;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        /* ================= HIỆU ỨNG MƯA TIM VIỀN HỒNG RUỘT ĐEN RƠI VÔ TẬN ================= */
+        #hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1; /* Nằm dưới UI chữ nhưng xuyên suốt cả welcome và trang trong */
+            pointer-events: none;
+        }
+
+        .falling-heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #020208; /* Ruột màu đen đặc che nền sau */
+            border: 2px solid #ff69b4; /* Viền trái tim màu hồng */
+            transform: rotate(45deg);
+            animation: fall linear infinite;
+            box-shadow: 0 0 8px rgba(255, 105, 180, 0.6);
+        }
+
+        /* Tạo hình trái tim bằng cách bo góc CSS cánh trái và phải */
+        .falling-heart::before,
+        .falling-heart::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #020208; /* Ruột đen cho phần tai tim */
+            border: 2px solid #ff69b4;
+            border-radius: 50%;
+        }
+
+        .falling-heart::before {
+            top: -11px;
+            left: -2px;
+            border-bottom: none;
+            border-right: none;
+        }
+
+        .falling-heart::after {
+            left: -11px;
+            top: -2px;
+            border-bottom: none;
+            border-left: none;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-50px) rotate(45deg) scale(0.5);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(105vh) rotate(405deg) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* ================= 1. MÀN HÌNH WELCOME KÍN ĐÁO 100% ================= */
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #060615;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            padding: 20px;
+        }
+
+        #welcome-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(1.1);
+        }
+
+        .welcome-title {
+            font-size: 1.8rem;
+            color: #ff69b4;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(255, 105, 180, 0.8);
+            margin-bottom: 40px;
+            animation: floatText 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatText {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+
+        .gift-box {
+            font-size: 5.5rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+            animation: shakeGift 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px #ff1493);
+        }
+
+        @keyframes shakeGift {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-12deg); }
+            40% { transform: rotate(12deg); }
+            60% { transform: rotate(-8deg); }
+            80% { transform: rotate(8deg); }
+        }
+
+        .click-hint {
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #ffb6c1;
+            letter-spacing: 1px;
+        }
+
+        /* ================= 2. TRANG CHÍNH: KHỐI ẢNH 3D XOAY CHUẨN GIỮA MÀN HÌNH ================= */
+        .wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff69b4;
+            text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff1493;
+            text-align: center;
+        }
+
+        .sphere-viewport {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            perspective: 1000px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+        }
+
+        .sphere-viewport:active {
+            cursor: grabbing;
+        }
+
+        .sphere {
+            position: relative;
+            width: 100px;
+            height: 140px;
+            transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
+            transform: rotateX(-10deg) rotateY(0deg);
+        }
+
+        .photo-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            border: 2px solid #ff69b4;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+            background: #111;
+            backface-visibility: visible;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .box-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .hint-text {
+            margin-bottom: 15px; 
+            font-size: 0.85rem; 
+            color: #ffb6c1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .heart-btn {
+            background: none;
+            border: none;
+            font-size: 3.5rem;
+            cursor: pointer;
+            animation: beat 1.2s infinite;
+            filter: drop-shadow(0 0 15px #ff1493);
+        }
+
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            40% { transform: scale(1.05); }
+            60% { transform: scale(1.15); }
+        }
+
+        /* ================= 3. THIỆP CHÚC MỪNG POP-UP ================= */
+        .letter-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(4, 4, 12, 0.96);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            padding: 20px;
+        }
+
+        .letter-modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .letter-content {
+            background: linear-gradient(135deg, #fff5f8, #ffe4e1);
+            color: #4a4a4a;
+            padding: 35px 25px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 0 35px rgba(255, 105, 180, 0.5);
+            border: 3px solid #ffb6c1;
+            transform: scale(0.7);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+        }
+
+        .letter-modal.open .letter-content {
+            transform: scale(1);
+        }
+
+        .letter-header {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .letter-title {
+            font-size: 1.4rem;
+            color: #ff1493;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .letter-body {
+            font-size: 1rem;
+            line-height: 1.6;
+            text-align: justify;
+            margin-bottom: 25px;
+            white-space: pre-line;
+        }
+
+        .close-btn {
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" src="music.mp3" loop></audio>
+
+    <div id="hearts-container"></div>
+
+    <div id="welcome-screen">
+        <div class="welcome-title">Có một bất ngờ cho e nè... 🥰</div>
+        <div class="gift-box" onclick="openGift()">🎁</div>
+        <div class="click-hint">Chạm vào hộp quà để mở ra nhé!</div>
+    </div>
+
+    <div class="wrapper">
+        <div class="title">Chúc Mừng Ngày Quốc Tế Thiếu Nhi!</div>
+
+        <div class="sphere-viewport" id="drag-viewport">
+            <div class="sphere" id="photo-sphere"></div>
+        </div>
+
+        <div class="box-container">
+            <p class="hint-text">Xem thư nhé🥰</p>
+            <button class="heart-btn" onclick="openLetter()">💌</button>
+        </div>
+    </div>
+
+    <div class="letter-modal" id="letterModal">
+        <div class="letter-content">
+            <div class="letter-header">Hôm nay, 01-06-2026</div>
+            <div class="letter-title">Là ngày "Quốc tế thiếu nhi" 🥰</div>
+            <div class="letter-body">
+                Chúc em bé nhỏ của anh mau ăn chóng lớn và ngoan ngoãn nhé. Luôn vui vẻ, nở nụ cười trên môi và đặc biệt là không được tiêu cực ạ.
+
+                Chúc bạn nhỏ ngày càng xinh xắn, đáng yêu, mong bạn có tất cả cả vũ trụ che chở. Thương bạn nhỏ của anh rất nhiều lắm... 💕
+            </div>
+            <button class="close-btn" onclick="closeLetter()">Đóng lại nha</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. HÀM TẠO MƯA TIM VIỀN HỒNG RUỘT ĐEN RƠI VÔ TẬN
+        const heartsContainer = document.getElementById('hearts-container');
+        const maxHearts = 40; // Số lượng tim xuất hiện cùng lúc trên màn hình
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('falling-heart');
+            
+            // Random kích thước, vị trí xuất hiện ngang và tốc độ rơi tự do
+            const size = Math.random() * 15 + 15; // kích thước từ 15px - 30px
+            heart.style.width = size + 'px';
+            heart.style.height = size + 'px';
+            
+            // Áp dụng kích thước tương ứng cho tai tim pseudo-elements
+            heart.style.setProperty('--size', size + 'px'); 
+            
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 3 + 4) + 's'; // rơi từ 4s - 7s
+            heart.style.animationDelay = Math.random() * 2 + 's';
+
+            heartsContainer.appendChild(heart);
+
+            // Tự động xóa hạt tim sau khi kết thúc animation để tránh nặng máy
+            heart.addEventListener('animationend', () => {
+                heart.remove();
+                createHeart();
+            });
+        }
+
+        // Khởi tạo cụm tim rơi ban đầu
+        for (let i = 0; i < maxHearts; i++) {
+            setTimeout(createHeart, i * 180);
+        }
+
+        // 2. HÀM CLICK MỞ HỘP QUÀ + KÍCH HOẠT PHÁT NHẠC TỰ ĐỘNG
+        function openGift() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            
+            // Phát nhạc nền đồng bộ tương tác người dùng
+            const music = document.getElementById('bg-music');
+            music.play().catch(error => {
+                console.log("Trình duyệt chặn phát tự động, nhạc sẽ phát khi tương tác tiếp theo:", error);
+            });
+        }
+
+        // 3. TẠO ALBUM ẢNH XẾP DẠNG VÒNG TRÒN 3D HOÀN CHỈNH GIỮA MÀN HÌNH
+        const totalPhotos = 10; 
+        const sphere = document.getElementById('photo-sphere');
+
+        for (let i = 0; i < totalPhotos; i++) {
+            const card = document.createElement('div');
+            card.classList.add('photo-card');
+            
+            const img = document.createElement('img');
+            img.src = `${i + 1}.jpg`; 
+            img.alt = `Kỷ niệm ${i + 1}`;
+            
+            img.onerror = function() {
+                this.style.display = 'none';
+                card.style.background = 'linear-gradient(45deg, #ff69b4, #ff1493)';
+            };
+
+            card.appendChild(img);
+            
+            const angle = (i * 360) / totalPhotos;
+            const radius = 240; 
+            
+            card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+            sphere.appendChild(card);
+        }
+
+        // 4. HỆ THỐNG XỬ LÝ KÉO THẢ XOAY ẢNH 3D XOAY QUANH TÂM CHUẨN MƯỢT MÀ
+        const dragViewport = document.getElementById('drag-viewport');
+        let isDragging = false;
+        let startX, startY;
+        
+        let targetX = 0;      
+        let targetY = -10;    
+        let autoRotateSpeed = 0.15; 
+
+        function updateRotation() {
+            if (!isDragging) {
+                targetX += autoRotateSpeed; 
+                sphere.style.transform = `rotateX(${targetY}deg) rotateY(${targetX}deg)`;
+            }
+            requestAnimationFrame(updateRotation);
+        }
+        updateRotation();
+
+        function startDrag(e) {
+            isDragging = true;
+            const pageX = e.touches ? e.touches[0].clientX : e.clientX;
+            const pageY = e.touches ? e.touches[0].clientY : e.clientY;
+            startX = pageX - targetX;
+            startY = pageY - targetY;
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const pageX = e.touches ? e.touches[0].clientX : e.clientX;
+            const pageY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            targetX = (pageX - startX) * 0.7; 
+            targetY = (pageY - startY) * 0.7; 
+            
+            if (targetY > 60) targetY = 60;
+            if (targetY < -60) targetY = -60;
+            
+            sphere.style.transform = `rotateX(${targetY}deg) rotateY(${targetX}deg)`;
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        dragViewport.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', onDrag);
+        window.addEventListener('mouseup', endDrag);
+
+        dragViewport.addEventListener('touchstart', startDrag, { passive: false });
+        window.addEventListener('touchmove', onDrag, { passive: false });
+        window.addEventListener('touchend', endDrag);
+
+        // 5. HÀM ĐIỀU KHIỂN POP-UP THƯ
+        function openLetter() {
+            document.getElementById('letterModal').classList.add('open');
+        }
+        function closeLetter() {
+            document.getElementById('letterModal').classList.remove('open');
+        }
+    </script>
+</body>
+</html>
